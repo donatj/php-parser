@@ -474,6 +474,8 @@ func NewLexer(src io.Reader, fName string) *Lexer {
 		panic(err)
 	}
 
+	positionBuffer := []position.Position{}
+
 	return &Lexer{
 		Lexer:         lx,
 		StateStack:    []int{0},
@@ -482,10 +484,15 @@ func NewLexer(src io.Reader, fName string) *Lexer {
 		heredocLabel:  "",
 		tokenBytesBuf: &bytes.Buffer{},
 		TokenPool: sync.Pool{
-			New: func() interface{} { return &Token{} },
+			New: func() interface{} {
+				return &Token{}
+			},
 		},
 		PositionPool: sync.Pool{
-			New: func() interface{} { return &position.Position{} },
+			New: func() interface{} {
+				positionBuffer = append(positionBuffer, position.Position{})
+				return &positionBuffer[len(positionBuffer)-1]
+			},
 		},
 	}
 }
